@@ -30,6 +30,24 @@ for _,pn in pairs(GAMESTATE:GetEnabledPlayers()) do
 	};
 end
 
+-- Single-player symmetry: mirror the joined player's Difficulty + Groove Radar to the empty side.
+do
+	local count, solo = 0, nil
+	for _,p in pairs(GAMESTATE:GetEnabledPlayers()) do count = count + 1; solo = p end
+	if count == 1 then
+		local diffX  = (solo == PLAYER_1) and SCREEN_RIGHT-94 or SCREEN_LEFT+94
+		local radarX = (solo == PLAYER_1) and SCREEN_RIGHT-86 or SCREEN_LEFT+86
+		t[#t+1] = loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/Difficulty"))(solo)..{
+			InitCommand=function(s) s:xy(diffX,_screen.cy-97):zoom(0.667) end,
+		};
+		t[#t+1] = Def.ActorFrame{
+			loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/RadarHandler/default.lua"))(solo)..{
+				InitCommand=function(s) s:xy(radarX,_screen.cy+24):zoom(0.667) end,
+			};
+		};
+	end
+end
+
 t[#t+1] = loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/Info"))()..{
 	OnCommand=function(s) s:zoom(0.667):y(57):diffusealpha(0):sleep(0.4):linear(0.05):diffusealpha(0.75):linear(0.1):diffusealpha(0.25):linear(0.1):diffusealpha(1) end,
 };
