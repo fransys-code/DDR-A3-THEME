@@ -124,6 +124,21 @@ end
 
 t[#t+1] = LoadActor("ScoreFrame")..{ InitCommand=function(s) s:draworder(99) end, };
 
+-- Single-player: fill the half the notefield leaves empty with a live stats pane.
+-- Skipped in versus (that side is P2's), in double (the notefield spans both sides), when
+-- Center1Player moves the notefield to the middle, and during attract mode.
+if not GAMESTATE:IsDemonstration() then
+	local count, solo = 0, nil
+	for _,p in pairs(GAMESTATE:GetEnabledPlayers()) do count = count + 1; solo = p end
+	local styleType = ToEnumShortString(GAMESTATE:GetCurrentStyle():GetStyleType())
+
+	if count == 1 and styleType == "OnePlayerOneSide"
+		and not PREFSMAN:GetPreference("Center1Player")
+	then
+		t[#t+1] = LoadActor("StepStats",solo);
+	end
+end
+
 
 if not GAMESTATE:IsDemonstration() then
 	
