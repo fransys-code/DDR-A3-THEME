@@ -170,8 +170,12 @@ local function MakeRow(rownames, idx)
 					local speedmult = screen:GetOptionRow(0):GetChoiceInRowWithFocus(pn)
 					local speedstring = THEME:GetString("OptionItemNames","Speed"..speedmult)
 					local speedsub = tonumber((string.gsub(speedstring, "x", ""))) or 1
+					local cmodbpm = tonumber(string.match(speedstring, "^C(%d+)"))
 
-					if song:IsDisplayBpmRandom() or song:IsDisplayBpmSecret() then
+					if cmodbpm then
+						-- C-mod: the scroll speed IS the constant BPM
+						text = cmodbpm
+					elseif song:IsDisplayBpmRandom() or song:IsDisplayBpmSecret() then
 						text = "?"
 					else
 						local td = steps:GetTimingData()
