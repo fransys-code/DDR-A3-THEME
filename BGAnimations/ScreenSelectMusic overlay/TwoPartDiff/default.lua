@@ -268,21 +268,42 @@ local function DiffInputHandler(event)
 	local button = event.button
 	if event.type == "InputEventType_Release" then return end
 	--SOUND:PlayOnce(THEME:GetPathS("_MusicWheel","Change"),true)
-	if (button == "MenuUp" or button == "MenuLeft") and selection[pn] > 1 and GAMESTATE:IsPlayerEnabled(pn) and keyset[pn] ~= 1 then
-		SOUND:PlayOnce(THEME:GetPathS("","ScreenSelectMusic difficulty harder"));
-		selection[pn] = selection[pn] - 1
-		GAMESTATE:SetCurrentSteps(pn,songSteps[selection[pn]])
-		GAMESTATE:SetPreferredDifficulty(pn,songSteps[selection[pn]]:GetDifficulty())
-		adjustScrollerFrame(pn)
-		MESSAGEMAN:Broadcast("TwoDiffLeft"..pn)
-		return false;
-	elseif (button == "MenuDown" or button == "MenuRight") and selection[pn] < numDiffs and GAMESTATE:IsPlayerEnabled(pn) and keyset[pn] ~= 1 then
-		SOUND:PlayOnce(THEME:GetPathS("","ScreenSelectMusic difficulty harder"));
-		selection[pn] = selection[pn] + 1
-		GAMESTATE:SetCurrentSteps(pn,songSteps[selection[pn]])
-		GAMESTATE:SetPreferredDifficulty(pn,songSteps[selection[pn]]:GetDifficulty())
-		MESSAGEMAN:Broadcast("TwoDiffRight"..pn)
-		adjustScrollerFrame(pn)
+	-- Le moteur traite lui-meme MenuUp/MenuDown et a DEJA change la difficulte
+	-- quand ce callback s'execute (mesure : 9 ms d'avance), et il ne consulte pas
+	-- notre valeur de retour -- PassInputToLua n'est jamais appele par
+	-- ScreenSelectMusic. Tenir un index maison en parallele, c'est garantir la
+	-- divergence des qu'un des deux refuse de bouger (butee) : le panneau
+	-- lateral suit GetCurrentSteps pendant que le scroller suit son compteur.
+	-- On se contente donc de refleter l'etat du moteur.
+	-- Le moteur fournit DEUX champs : event.button = bouton de JEU ("Down",
+	-- "Up"...) et event.GameButton = bouton de MENU ("MenuDown"...). Le code
+	-- d'origine ne testait que "MenuDown"/"MenuUp" sur event.button, qui ne
+	-- contient jamais ca : la condition n'etait jamais vraie et ce selecteur ne
+	-- repondait donc a aucune touche. On accepte les deux champs.
+	local menuBtn = event.GameButton
+	local isDir = menuBtn == "MenuUp"   or menuBtn == "MenuDown"
+	           or menuBtn == "MenuLeft" or menuBtn == "MenuRight"
+	           or button  == "Up"       or button  == "Down"
+	           or button  == "Left"     or button  == "Right"
+	local active = pn ~= nil and GAMESTATE:IsPlayerEnabled(pn) and keyset[pn] ~= 1
+	if isDir and active then
+		-- Comparer par DIFFICULTE, pas par identite d'objet : deux appels
+		-- renvoyant le meme Steps donnent des userdata distincts, donc
+		-- `steps == cur` est toujours faux.
+		local cur = GAMESTATE:GetCurrentSteps(pn)
+		local curDiff = cur and cur:GetDifficulty() or nil
+		local moved = false
+		for i, steps in ipairs(songSteps) do
+			if curDiff and steps:GetDifficulty() == curDiff and selection[pn] ~= i then
+				selection[pn] = i
+				moved = true
+			end
+		end
+		if moved then
+			SOUND:PlayOnce(THEME:GetPathS("","ScreenSelectMusic difficulty harder"));
+			adjustScrollerFrame(pn)
+			MESSAGEMAN:Broadcast("TwoDiff"..pn)
+		end
 		return true;
 	elseif (button == "Start") and GAMESTATE:IsPlayerEnabled(pn) then
 		keyset[pn] = 1
