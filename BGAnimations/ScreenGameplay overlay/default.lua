@@ -4,6 +4,9 @@ for pn in ivalues(GAMESTATE:GetHumanPlayers()) do
 	t[#t+1] = LoadActor("FullCombo",pn);
 end;
 
+-- Rythme cardiaque temps reel (Polar H10 via hr_bridge.py). Cf. docs/05.
+t[#t+1] = LoadActor("HeartRate");
+
 
 
 if not GAMESTATE:IsCourseMode() then

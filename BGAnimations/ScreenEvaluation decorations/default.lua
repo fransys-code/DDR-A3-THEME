@@ -3,6 +3,9 @@ local t = Def.ActorFrame{};
 local StageIndex = GAMESTATE:GetCurrentStageIndex()
 local FinalStage = PREFSMAN:GetPreference("SongsPerPlay")
 
+-- Bilan cardio du morceau (Polar H10). Ne dessine rien si aucune mesure. Cf. docs/05.
+t[#t+1] = LoadActor("HeartRate");
+
 t[#t+1] = Def.ActorFrame{
     StandardDecorationFromFile("Header","Header");
     StandardDecorationFromFileOptional("Footer","Footer");

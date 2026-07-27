@@ -55,6 +55,9 @@ t[#t+1] = loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/StageDisplay"))()
 	OnCommand=function(s) s:zoom(0.667):diffusealpha(0):sleep(0.4):linear(0.05):diffusealpha(0.75):linear(0.1):diffusealpha(0.25):linear(0.1):diffusealpha(1) end,
 };
 
+-- Rythme cardiaque courant (Polar H10), en haut a droite. Cf. docs/05.
+t[#t+1] = LoadActor("HeartRate");
+
 return Def.ActorFrame{
 	OffCommand=function(s) s:finishtweening() end,
 	TwoPart;
