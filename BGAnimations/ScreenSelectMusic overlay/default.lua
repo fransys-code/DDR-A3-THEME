@@ -30,16 +30,15 @@ for _,pn in pairs(GAMESTATE:GetEnabledPlayers()) do
 	};
 end
 
--- Single-player symmetry: mirror the joined player's Difficulty + Groove Radar to the empty side.
+-- Single-player symmetry: mirror the joined player's Groove Radar to the empty side.
+-- La liste des difficultes n'est PAS dupliquee : elle repete a l'identique celle
+-- de gauche, et le selecteur central affiche deja la meme information pendant le
+-- choix. Seul le radar est mirore, car il n'apparait nulle part ailleurs.
 do
 	local count, solo = 0, nil
 	for _,p in pairs(GAMESTATE:GetEnabledPlayers()) do count = count + 1; solo = p end
 	if count == 1 then
-		local diffX  = (solo == PLAYER_1) and SCREEN_RIGHT-94 or SCREEN_LEFT+94
 		local radarX = (solo == PLAYER_1) and SCREEN_RIGHT-86 or SCREEN_LEFT+86
-		t[#t+1] = loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/Difficulty"))(solo)..{
-			InitCommand=function(s) s:xy(diffX,_screen.cy-97):zoom(0.667) end,
-		};
 		t[#t+1] = Def.ActorFrame{
 			loadfile(THEME:GetPathB("ScreenSelectMusic","overlay/RadarHandler/default.lua"))(solo)..{
 				InitCommand=function(s) s:xy(radarX,_screen.cy+24):zoom(0.667) end,
